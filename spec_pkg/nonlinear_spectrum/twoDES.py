@@ -157,8 +157,31 @@ def calc_2DES_time_series(q_func,dipole_mom,E_min1,E_max1,E_min2,E_max2,num_poin
 		current_delay=0.0
 		current_delay_index=0
 		counter=0
+		print('t2 times: ',np.arange(counter,num_times)*eff_time_step_2DES, flush=True)
+		t2f_test = os.path.isfile("t2_counts.dat")
+		if t2f_test:
+			t2fs = np.loadtxt('t2_counts.dat')
+			t2fs = t2fs.reshape(( int(len(t2fs)/3), 3 ))
+			current_delay,current_delay_index,counter = t2fs[-1]
+			current_delay_index = int(current_delay_index)
+			counter = int(counter)
+			print('Restarting 2DES time series at:', flush=True)
+			print('current_delay: '+str(current_delay), flush=True)
+			print('current_delay_index: '+str(current_delay_index), flush=True)
+			print('counter: '+str(counter), flush=True)
+			print('Go!', flush=True)
+			t2f = open("t2_counts.dat", "a")
+		else:
+			t2f = open("t2_counts.dat", "w")
+			print('Starting new 2DES time series...', flush=True)
 		while counter<num_times:
-				print(counter,current_delay)
+				t2f.write(str(current_delay)+'\n')
+				t2f.flush()
+				t2f.write(str(current_delay_index)+'\n')
+				t2f.flush()
+				t2f.write(str(counter)+'\n')
+				t2f.flush()
+				print(' index: '+str(current_delay_index)+' current t2: '+str(current_delay), flush=True)
 				spectrum_2D=calc_2D_spectrum(q_func,dipole_mom,current_delay,current_delay_index,E_min1,E_max1,E_min2,E_max2,num_points_2D,mean)
 				print_2D_spectrum(rootname+'_2DES_'+str(counter)+'.dat',spectrum_2D,False)
 
@@ -172,13 +195,18 @@ def calc_2DES_time_series(q_func,dipole_mom,E_min1,E_max1,E_min2,E_max2,num_poin
 				averaged_val[counter,0]=current_delay
 				averaged_val[counter,1]=cumul.simpson_integral_2D(spectrum_2D)
 				#averaged_val[counter,1]=np.sum(spectrum_2D[:,:,2])/(spectrum_2D.shape[0]*2.0)
-				print(averaged_val[counter,1])
+				print( ' current avg: '+str(averaged_val[counter,1]), flush=True)
+				np.savetxt('ta_'+str(counter)+'.dat',transient_abs[counter])
 				counter=counter+1
 				current_delay=current_delay+eff_time_step_2DES
 				current_delay_index=current_delay_index+eff_time_index_2DES
-
+				
+		
+		print('2DES time series finishing...', flush=True)
 		print_2D_spectrum(rootname+'_2nd_order_cumulant_transient_absorption_spec.txt',transient_abs,False)
 		np.savetxt(rootname+'_2DES_2nd_order_cumulant_averaged_spectrum.txt',averaged_val)
+		t2f.close()
+		print('Done with 2DES time series!', flush=True)
 
 # basic calculation routines:
 # calculate a full series of 2DES spectra, sampled with a certain delay time step
