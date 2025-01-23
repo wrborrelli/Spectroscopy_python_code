@@ -4,6 +4,7 @@ from scipy import integrate
 import time
 import sys
 import os
+import os.path
 import numpy as np
 import math
 import cmath
@@ -1874,15 +1875,26 @@ elif param_set.task=='2DES':
     
 
         elif param_set.model=='MD':
+                print('Initiating MD 2DES calculation...', flush=True)
                 filename_2DES=param_set.MD_root+''
                 # first check if we have a solvent model
                 if param_set.is_solvent:
+                        print('Solvent related calculations...', flush=True)
                         solvent_mod.calc_spectral_dens(param_set.num_steps)
                         solvent_mod.calc_g2_solvent(param_set.temperature,param_set.num_steps,param_set.max_t,param_set.stdout)
                 # then set up g2 for MDtraj
-                MDtraj.calc_2nd_order_corr()
-                MDtraj.calc_spectral_dens(param_set.temperature_MD)
-                np.savetxt(param_set.MD_root+'MD_spectral_density.dat', MDtraj.spectral_dens)
+                # check if we can load in spectral density already
+                check_sdf = os.path.isfile(param_set.MD_root+'MD_spectral_density.dat')
+                if check_sdf:
+                    print('Loading spectral density...', flush=True)
+                    MDtraj.calc_2nd_order_corr()
+                    MDtraj.spectral_dens = np.loadtxt(param_set.MD_root+'MD_spectral_density.dat')
+                else:
+                    print('Calculating spectral density...', flush=True)
+                    MDtraj.calc_2nd_order_corr()
+                    MDtraj.calc_spectral_dens(param_set.temperature_MD)
+                    np.savetxt(param_set.MD_root+'MD_spectral_density.dat', MDtraj.spectral_dens)
+                print('Calculating g2...', flush=True)
                 MDtraj.calc_g2(param_set.temperature,param_set.max_t,param_set.num_steps,param_set.stdout)
                 # 3rd order cumulant calculation? Then compute g_3, as well as the 3rd order quantum correlation function
                 if param_set.third_order:
@@ -1922,6 +1934,7 @@ elif param_set.task=='2DES':
 
 
                 # set the start and end values for both the x and the y axis of the
+                print('Starting explicit 2DES calculations...', flush=True)
                 # 2DES spectrum
                 eff_shift1=0.0
                 eff_shift2=0.0
@@ -1945,6 +1958,7 @@ elif param_set.task=='2DES':
                         if param_set.third_order:
                                 twoDES.calc_2DES_time_series_3rd(q_func_eff,MDtraj.g3,MDtraj.h1,MDtraj.h2,MDtraj.h4,MDtraj.h5,MDtraj.corr_func_3rd_qm_freq,E_start1,E_end1,E_start2,E_end2,param_set.num_steps_2DES,filename_2DES,param_set.num_time_samples_2DES,param_set.t_step_2DES,MDtraj.mean)
                         else:
+                                print('2nd Order Cumulant 2DES go!', flush=True)
                                 twoDES.calc_2DES_time_series(q_func_eff,param_set.dipole_mom,E_start1,E_end1,E_start2,E_end2,param_set.num_steps_2DES,filename_2DES,param_set.num_time_samples_2DES,param_set.t_step_2DES,MDtraj.mean)
                 elif param_set.method_2DES=='PUMP_PROBE':
                         twoDES.calc_pump_probe_time_series(q_func_eff,E_start,E_end,param_set.num_steps_2DES,filename_2DES,param_set.pump_energy,param_set.num_time_samples_2DES,param_set.t_step_2DES,MDtraj.mean)
