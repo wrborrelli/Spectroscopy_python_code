@@ -8,7 +8,6 @@ from scipy import integrate
 import time
 from numba import config,jit, njit
 from spec_pkg.cumulant import cumulant as cumul
-from spec_pkg.GBOM import gbom_cumulant_response as cumul_gbom
 
 # basic analysis routines. Printing full 2DES, printing slices through the full 2DES along xaxis, yaxis and diagonal.
 
