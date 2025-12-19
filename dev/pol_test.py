@@ -12,4 +12,5 @@ t2s_ind = 0
 out = cumu.compute_polarized_tdm(dipoles, t2s_ind, 50, "parallel")
 
 print(out.shape)
+print(out[0])
 

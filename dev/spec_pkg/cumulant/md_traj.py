@@ -241,7 +241,6 @@ class MDtrajs:
                 self.ensemble_response=np.zeros((1,1))
                 self.cumulant_response=np.zeros((1,1))
 
-
 	# currently only works for 2nd order
         def calc_ht_correction(self,temp,max_t,num_steps,corr_length,low_freq_filter,third_order,gs_dipole_ref,dipole_dipole_only,is_emission,stdout):
                 kbT=temp*const.kb_in_Ha

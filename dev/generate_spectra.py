@@ -1949,7 +1949,10 @@ elif param_set.task=='2DES':
                                 twoDES.calc_2DES_time_series_3rd(q_func_eff,MDtraj.g3,MDtraj.h1,MDtraj.h2,MDtraj.h4,MDtraj.h5,MDtraj.corr_func_3rd_qm_freq,E_start1,E_end1,E_start2,E_end2,param_set.num_steps_2DES,filename_2DES,param_set.num_time_samples_2DES,param_set.t_step_2DES,MDtraj.mean)
                         else:
                                 print('2nd Order Cumulant 2DES go!', flush=True)
-                                twoDES.calc_2DES_time_series(q_func_eff,param_set.dipole_mom,E_start1,E_end1,E_start2,E_end2,param_set.num_steps_2DES,filename_2DES,param_set.num_time_samples_2DES,param_set.t_step_2DES,MDtraj.mean)
+                                if param_set.polarization:
+                                    twoDES.calc_2DES_time_series(q_func_eff,MDtraj.dipole_mom,E_start1,E_end1,E_start2,E_end2,param_set.num_steps_2DES,filename_2DES,param_set.num_time_samples_2DES,param_set.t_step_2DES,MDtraj.mean,param_set.polarization, param_set.pol_type)
+                                else:
+                                    twoDES.calc_2DES_time_series(q_func_eff,param_set.dipole_mom,E_start1,E_end1,E_start2,E_end2,param_set.num_steps_2DES,filename_2DES,param_set.num_time_samples_2DES,param_set.t_step_2DES,MDtraj.mean,param_set.polarization, param_set.pol_type)
                 elif param_set.method_2DES=='PUMP_PROBE':
                         twoDES.calc_pump_probe_time_series(q_func_eff,E_start,E_end,param_set.num_steps_2DES,filename_2DES,param_set.pump_energy,param_set.num_time_samples_2DES,param_set.t_step_2DES,MDtraj.mean)
                 else:

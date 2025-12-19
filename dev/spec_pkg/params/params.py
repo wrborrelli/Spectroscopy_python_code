@@ -86,6 +86,8 @@ class params:
         self.is_vertical_gradient=False
         self.task=''
         self.method=''
+        self.polarization=False
+        self.pol_type='parallel'
         self.scale_Jmat=False   # do we want to manually scale the Jmatrix?
         self.Jmat_scaling_fac=1.0  # this is the scaling factor
         self.Jpath=''
@@ -123,6 +125,8 @@ class params:
         self.model=get_param(filepath,'CHROMOPHORE_MODEL') # model for the chromophore degrees of freedom
 								   # Current options: MD, GBOM, MORSE
         self.method=get_param(filepath,'METHOD') # ensemble, EZTFC, cumulant, FC etc, EOPT_AV  # EOPT_AV only works for GBOMs
+        self.polarization=get_param(filepath,'POLARIZATION')
+        self.pol_type=get_param(filepath,'POLARIZATION_TYPE')
         self.method_2DES=get_param(filepath,'NONLINEAR_EXP')  # 2DES, PUMP_PROBE
         self.Jpath=get_param(filepath,'JMAT')
         self.Kpath=get_param(filepath,'KVEC')
@@ -141,6 +145,22 @@ class params:
 									    # this will be extended to other supported codes
 
         # dealt with keywords that were names. Now deal with variables
+
+        par = get_param(filepath, 'POLARIZATION')
+        if par == 'TRUE':
+            self.polarization = True
+        if par == 'FALSE':
+            self.polarization = False
+
+        par = get_param(filepath, 'POLARIZATION_TYPE')
+        if par == 'PARALLEL':
+            self.pol_type = "parallel"
+        elif par == "perpendicular":
+            self.pol_type = "perpendicular"
+        elif par == "CROSS":
+            self.pol_type = "cross"
+        else:
+            self.pol_type = "parallel"
 
         par = get_param(filepath, 'CUMULANT_NONGAUSSIAN_PREFACTOR')
         if par == 'TRUE':

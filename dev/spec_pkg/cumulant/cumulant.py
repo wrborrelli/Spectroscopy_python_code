@@ -561,7 +561,7 @@ def get_correlation_integrant_3rd(fluctuations,current_corr_i,current_corr_j,cor
 
 # compute avg polarization dependent TDM prefactor
 
-def compute_polarized_tdm(dipoles, t2_index, max_index, pol_type):
+def compute_polarized_tdm(dipoles, steps_in_t_delay, q_func, pol_type):
     x_dip = np.array([1,0,0])
     y_dip = np.array([0,1,0])
     if pol_type == "parallel":
@@ -574,19 +574,36 @@ def compute_polarized_tdm(dipoles, t2_index, max_index, pol_type):
         print('Unknown polarization type!')
         sys.exit()
 
-    #pol_dips = np.zeros(( int(len(dipoles)/10), max_index, max_index ))
-    pol_dips = np.zeros(( 4, max_index, max_index ))
+    print('dipoles shape:',dipoles.shape)
+    step_length=q_func[1,0].real-q_func[0,0].real
+    max_index=0
+    temp_max_index=q_func.shape[0]-steps_in_t_delay
+    if (temp_max_index%2) ==0:
+        # even.
+        max_index=int(temp_max_index/2)
+    else:
+        # odd
+        max_index=int((temp_max_index-1)/2)
+
+    # avg dipole correlations up to 1/10 of trajectory length
+    pol_dips = np.zeros(( int(len(dipoles)/10), max_index, max_index ))
+    pol_dips[pol_dips == 0] = np.nan
+    avg_pol_dips = np.zeros(( max_index, max_index ))
     for t0 in range(pol_dips.shape[0]):
         for count1 in range(max_index-t0):
             for count2 in range(max_index-t0):
-                term1 = np.dot(edips[-1], dipoles[t0+count1+t2_index+count2])
-                term2 = np.dot(edips[-2], dipoles[t0+count1+t2_index])
-                term3 = np.dot(edips[-3], dipoles[t0+count1])
-                term4 = np.dot(edips[-4], dipoles[t0])
+                term1 = np.dot(edips[-1], dipoles[t0+count1+steps_in_t_delay+count2][0])
+                term2 = np.dot(edips[-2], dipoles[t0+count1+steps_in_t_delay][0])
+                term3 = np.dot(edips[-3], dipoles[t0+count1][0])
+                term4 = np.dot(edips[-4], dipoles[t0][0])
                 total_dip = term1*term2*term3*term4
+                print('total_dip',total_dip)
                 pol_dips[t0][count1,count2] = total_dip
+    for count1 in range(max_index):
+        for count2 in range(max_index):
+            avg_pol_dips[count1,count2] = np.nanmean(pol_dips[:,count1,count2])
 
-    return pol_dips
+    return avg_pol_dips
 
 def construct_corr_func(fluctuations,num_trajs,tau,time_step):
 	corr_func=np.zeros(fluctuations.shape[0]*2-1)
