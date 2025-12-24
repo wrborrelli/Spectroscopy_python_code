@@ -586,10 +586,9 @@ def compute_polarized_tdm(dipoles, steps_in_t_delay, q_func, pol_type):
         max_index=int((temp_max_index-1)/2)
 
     # avg dipole correlations up to 1/10 of trajectory length
-    pol_dips = np.zeros(( int(len(dipoles)/10), max_index, max_index ))
-    pol_dips[pol_dips == 0] = np.nan
+    pol_dips = np.zeros(( max_index, max_index ))
     avg_pol_dips = np.zeros(( max_index, max_index ))
-    for t0 in range(pol_dips.shape[0]):
+    for t0 in range(int(dipoles.shape[0]/100)):
         for count1 in range(max_index-t0):
             for count2 in range(max_index-t0):
                 term1 = np.dot(edips[-1], dipoles[t0+count1+steps_in_t_delay+count2][0])
@@ -597,11 +596,9 @@ def compute_polarized_tdm(dipoles, steps_in_t_delay, q_func, pol_type):
                 term3 = np.dot(edips[-3], dipoles[t0+count1][0])
                 term4 = np.dot(edips[-4], dipoles[t0][0])
                 total_dip = term1*term2*term3*term4
-                print('total_dip',total_dip)
-                pol_dips[t0][count1,count2] = total_dip
-    for count1 in range(max_index):
-        for count2 in range(max_index):
-            avg_pol_dips[count1,count2] = np.nanmean(pol_dips[:,count1,count2])
+                pol_dips[count1,count2] += total_dip
+    print('dipole normalization:',int(dipoles.shape[0]/100))
+    avg_pol_dips = pol_dips/int(dipoles.shape[0]/100)
 
     return avg_pol_dips
 

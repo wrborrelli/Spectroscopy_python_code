@@ -182,10 +182,11 @@ def calc_2DES_time_series(q_func,dipole_mom,E_min1,E_max1,E_min2,E_max2,num_poin
                 t2f.flush()
                 print(' index: '+str(current_delay_index)+' current t2: '+str(current_delay), flush=True)
                 if polarization:
-                    dipole_mom = cumul.compute_polarized_tdm(dipole_mom, current_delay_index, q_func, pol_type)
-                    print('polarized dipole shape',dipole_mom.shape,flush=True)
+                    print('doing polarization t2 index=',str(current_delay_index))
+                    pol_dipole_mom = cumul.compute_polarized_tdm(dipole_mom, current_delay_index, q_func, pol_type)
+                    print('polarized dipole shape',pol_dipole_mom.shape,flush=True)
                     print('q_func shape',q_func.shape,flush=True)
-                    spectrum_2D=calc_2D_spectrum_pol(q_func,dipole_mom,current_delay,current_delay_index,E_min1,E_max1,E_min2,E_max2,num_points_2D,mean)
+                    spectrum_2D=calc_2D_spectrum_pol(q_func,pol_dipole_mom,current_delay,current_delay_index,E_min1,E_max1,E_min2,E_max2,num_points_2D,mean)
                 else:
                     spectrum_2D=calc_2D_spectrum(q_func,dipole_mom,current_delay,current_delay_index,E_min1,E_max1,E_min2,E_max2,num_points_2D,mean)
                 print_2D_spectrum(rootname+'_2DES_'+str(counter)+'.dat',spectrum_2D,False)
